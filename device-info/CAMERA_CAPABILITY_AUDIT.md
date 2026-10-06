@@ -35,6 +35,15 @@ Captured from the connected handset over ADB on 2026-10-06. Camera IDs are repre
 
 **Conclusion:** no reliable ADB command, ordinary app permission, or documented setting was found to unlock these missing OEM paths on this build. Root/system-image modification would be a separate firmware reverse-engineering project, with uncertain results and risk of breaking camera operation. We should implement all public modes that the live API advertises, then measure and compare our own captures against Xiaomi's stock camera.
 
+### What unofficial camera-app users usually mean by “unlock”
+
+- **GCam ports and XML configs** replace Google's Pixel camera app with a community-modified APK and per-device tuning. They can change multi-frame HDR/night processing while still using the camera streams the firmware exposes. A Redmi 13 5G (`breeze`) GCam port/config page exists, and an online Xiaomi camera initialization log for exact model `2406ERN9CI` records only Camera2 IDs 0/1 at 4000x3000 rear and 4208x3120 front, matching this audit. This is evidence of a third-party GCam app running, not evidence of 108 MP stream access. Port/config claims are community reports, not Xiaomi guarantees; compare results and check every output's actual pixel dimensions.
+- **Root/Magisk HAL3 enabler modules or build.prop edits** are older workarounds for devices where Camera2 was disabled. They can sometimes expose standard Camera2 capability that the OEM already implemented but hid. Here Camera2 is already live at FULL level with RAW/manual controls, so toggling HAL3 does not explain how to add a missing 12000x9000 JPEG path, macro camera ID, OIS, or unsupported OEM algorithm. Forcing a property cannot implement missing HAL/ISP support.
+- **Custom ROMs and patched camera libraries/HALs** can alter capability metadata or route to proprietary streams when someone has reverse-engineered the exact device's vendor stack. This is device/build-specific development, not a generic settings trick. We found no credible Redmi 13 5G-specific patch demonstrating 108 MP output or restored macro selection on HyperOS `OS3.0.303.0.WNUINXM`.
+- **Vendor extension/SDK integrations** are the supported way manufacturers can expose private HDR/night effects to other apps. Android's OEM extension interface only exposes modes implemented by the vendor; our runtime query is empty. Xiaomi's Camera Engine SDK describes private features, but the published compatibility list does not include this model.
+
+So the most realistic unofficial experiment for this phone is to install a reputable `breeze`-targeted GCam port/config and compare it to stock using matched scenes and EXIF/pixel dimensions. That may improve computational JPEG output; don't expect it to make the app capture 108 MP or bring hidden modules/stabilization back. The new app can pursue similar multi-frame processing on the public 12 MP stream, but would need careful capture alignment, image quality and battery/thermal measurement.
+
 ## Platform, power, and graphics
 
 - Display snapshot: 1080x2460, density 440 dpi. The display can refresh up to 120 Hz per Xiaomi, but preview should use adaptive refresh where available; avoid forcing 120 Hz during long recording.
@@ -69,4 +78,6 @@ Captured from the connected handset over ADB on 2026-10-06. Camera IDs are repre
 - [CameraX video quality capability query](https://developer.android.com/media/camera/camerax/video-capture)
 - [Camera2 OEM extensions and runtime support check](https://developer.android.com/media/camera/camera2/extensions-api)
 - [Xiaomi Camera Engine SDK integration documentation](https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1812)
+- [Community GCam port listing for Redmi 13 5G / breeze](https://memeosupdates.com/hyperos/breeze/gcam)
+- [Redmi 13 5G camera initialization log excerpt showing Camera2 dimensions](https://www.scribd.com/document/913186842/log-20250831)
 - [Android thermal-aware camera guidance](https://developer.android.com/agents/skills/camera/camerax/references/thermals)
