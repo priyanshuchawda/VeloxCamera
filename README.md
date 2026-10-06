@@ -4,7 +4,7 @@ An experimental Android camera app focused on making the most of the connected X
 
 ## Device research
 
-This app targets the Redmi 13 5G (`2406ERN9CI`, codename `breeze`). It has a Snapdragon 4 Gen 2 AE platform, Adreno GPU, 108 MP marketed main camera, and a 13 MP front camera. ADB reports 12 MP maximum regular rear JPEG output, and Xiaomi lists video recording up to 1080p at 30 fps. See [Xiaomi's specifications](https://www.mi.com/in/product/redmi-13-5g/specs/), the initial ADB captures in [`device-info/`](device-info/), and the [detailed camera capability audit](device-info/CAMERA_CAPABILITY_AUDIT.md). The camera service lists five public IDs, including alias/auxiliary paths.
+This app targets the Redmi 13 5G (`2406ERN9CI`, codename `breeze`). It has a Snapdragon 4 Gen 2 AE platform, Adreno GPU, 108 MP marketed main camera, and a 13 MP front camera. ADB reports 12 MP maximum regular rear JPEG output, and Xiaomi lists video recording up to 1080p at 30 fps. See [Xiaomi's specifications](https://www.mi.com/in/product/redmi-13-5g/specs/), the initial ADB captures in [`device-info/`](device-info/), and the [detailed camera capability audit](device-info/CAMERA_CAPABILITY_AUDIT.md). A live Camera2 probe finds two app-visible cameras; the low-level service dump has five internal/legacy entries. The [audit report](device-info/CAMERA_CAPABILITY_AUDIT.md) separates those and records the verified stream limits.
 
 ## Direction
 

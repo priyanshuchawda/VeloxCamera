@@ -12,7 +12,7 @@ Make a fast, dependable camera for the Redmi 13 5G that produces the best photos
 - Rear: marketed 108 MP main camera plus 2 MP macro camera. Front: 13 MP.
 - Xiaomi's India specifications list rear/front video modes through 1080p30, not 4K. The application must enumerate encoder and CameraX/Camera2 output options rather than promise higher resolution or frame rates.
 - Xiaomi advertises 3x in-sensor zoom. Verify available zoom/crop behavior; don't present it as a separate telephoto lens.
-- Camera service reports five public IDs. Main rear regular JPEG/RAW output tops at 4000x3000; 12000x9000 maximum-resolution pixel-array metadata does not correspond to an advertised 108 MP JPEG/RAW stream. See [`device-info/CAMERA_CAPABILITY_AUDIT.md`](../device-info/CAMERA_CAPABILITY_AUDIT.md) for findings and app-side capture tests still needed.
+- A live API 36 probe reports two app-visible cameras (rear/front), no exposed physical-camera IDs, and no concurrent camera pair. The lower-level camera service lists five legacy/internal entries. Main rear regular JPEG/RAW output tops at 4000x3000; 12000x9000 maximum-resolution pixel-array metadata does not correspond to an advertised 108 MP JPEG/RAW stream. See [`device-info/CAMERA_CAPABILITY_AUDIT.md`](../device-info/CAMERA_CAPABILITY_AUDIT.md) for findings and the remaining capture tests.
 - The phone has a side fingerprint reader. Ordinary app APIs provide biometric authentication, not raw fingerprint sensor touch events suitable for a shutter gesture.
 
 ## Product principles
