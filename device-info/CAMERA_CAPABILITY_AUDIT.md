@@ -24,6 +24,17 @@ Captured from the connected handset over ADB on 2026-10-06. Camera IDs are repre
 - Main also advertises RAW_SENSOR and manual sensor capability. This provides a path for optional DNG/manual controls, but exposure/focus ranges and actual DNG output need an app-side capture test. RAW is not automatically higher-quality for normal users: it lacks the OEM processed JPEG's finished tone/noise pipeline and costs storage/processing.
 - Reprocessing and burst capabilities exist in metadata. CameraX ZSL support should be queried at runtime; `camera.disable_zsl_mode=1` suggests firmware policy may disable it even though private reprocessing is declared.
 
+## Can unavailable modes be enabled?
+
+- **108 MP stills:** No supported user-level switch was found. The 12000x9000 maximum pixel-array metadata does not correspond to an advertised maximum-resolution JPEG/RAW stream, and this firmware reports third-party high-resolution blob scenes disabled. A regular app cannot create a sensor/ISP output mode the HAL does not expose. Xiaomi's stock app may have a private path, but that does not make it available to a third-party app. Do not change vendor properties or flash camera blobs on this evidence; it is not a documented unlock path and may break camera behavior.
+- **4K or higher frame-rate video:** Codec support alone is insufficient. The phone's normal profile and official Redmi 13 5G specification baseline is 1080p30. Camera2 does advertise a constrained 720p120 session; this is worth an app-side experiment, but it is not equivalent to an officially supported slow-motion recording profile. Query CameraX qualities at runtime and test high-speed capture separately.
+- **HDR/Night processing:** The live Camera2 extension query returned no extensions for either app-visible camera. Android exposes only OEM extensions a device implements. Xiaomi publishes a Camera Engine SDK with features such as Super Night and video HDR, but access is limited to supported devices; the Redmi 13 5G is not named in the published supported-device list we checked. So there is no documented SDK route confirmed for this handset/build. Stock Camera app modes, if present, may use Xiaomi-private processing unavailable to our app.
+- **Stabilization:** Camera2's standard stabilization keys expose no active EIS/OIS mode, and this module metadata reports no OIS. App-side gyro-based stabilization is a possible later software feature because the phone has a gyroscope, but requires cropping, frame buffering/processing and sustained quality/thermal testing; it cannot enable physical OIS.
+- **Zero-shutter-lag:** The device metadata advertises reprocessing, while a vendor property says ZSL is disabled. Treat this as firmware-controlled/unresolved. Query CameraX support and test capture latency; do not toggle undocumented properties.
+- **Macro lens:** The module exists in vendor properties and low-level service enumeration, but it is not one of the two app-visible logical camera IDs and no physical-camera IDs are exposed. No public Camera2 switch to the macro module was found.
+
+**Conclusion:** no reliable ADB command, ordinary app permission, or documented setting was found to unlock these missing OEM paths on this build. Root/system-image modification would be a separate firmware reverse-engineering project, with uncertain results and risk of breaking camera operation. We should implement all public modes that the live API advertises, then measure and compare our own captures against Xiaomi's stock camera.
+
 ## Platform, power, and graphics
 
 - Display snapshot: 1080x2460, density 440 dpi. The display can refresh up to 120 Hz per Xiaomi, but preview should use adaptive refresh where available; avoid forcing 120 Hz during long recording.
@@ -37,7 +48,7 @@ Captured from the connected handset over ADB on 2026-10-06. Camera IDs are repre
 
 - Read-only ADB collection completed: Camera2 metadata, display, sensor/thermal/battery snapshots, installed stock camera package/version, Xiaomi camera module properties, vendor codec and recording-profile configs, and feature flags.
 - A minimal framework `CameraManager`/`StreamConfigurationMap`/Camera2-extension/`MediaCodecList` probe was compiled against Android API 36, installed, and executed. It confirmed two app-visible cameras, empty physical-camera/concurrent-camera/extension lists, empty high-resolution JPEG/RAW lists, and the reported modes above. The first install failed because the APK omitted `uses-sdk`; after fixing that, a packaging error nested `classes.dex` instead of placing it at the APK root. Both were fixed; the probe installed successfully. The diagnostic app has since been uninstalled. No install-verification settings were changed.
-- No photo/video files were captured; only the probe app camera permission was granted and then removed by uninstalling the app. No camera/system settings were changed. Remaining experiments: JPEG EXIF and image-quality comparison, DNG capture, 1080p30 recordings (front/rear), constrained 720p120 sustained recording, focus/exposure/zoom behavior, camera-switch latency, heat/frame drops, and battery drain.
+- No photo/video files were captured; only the probe app camera permission was granted and then removed by uninstalling the app. No camera/system settings were changed. Readiness: sufficient for the first Kotlin/CameraX MVP and for making honest capability-based controls; not sufficient to claim best achievable image quality, 720p120 reliability, image stabilization quality, sustained thermal limits, or battery efficiency. Remaining experiments: CameraX supported-quality query with preview and still capture bound, JPEG EXIF and image-quality comparison against Xiaomi stock, DNG capture, 1080p30 recordings (front/rear), constrained 720p120 sustained recording, focus/exposure/zoom behavior, camera-switch latency, heat/frame drops, and battery drain.
 
 ## Architecture implications
 
@@ -55,4 +66,7 @@ Captured from the connected handset over ADB on 2026-10-06. Camera IDs are repre
 - [CameraX resolution and stream configuration](https://developer.android.com/media/camera/camerax/configuration)
 - [CameraX OEM extensions](https://developer.android.com/media/camera/camerax/extensions-api)
 - [Android constrained high-speed camera sessions](https://developer.android.com/reference/android/hardware/camera2/CameraConstrainedHighSpeedCaptureSession)
+- [CameraX video quality capability query](https://developer.android.com/media/camera/camerax/video-capture)
+- [Camera2 OEM extensions and runtime support check](https://developer.android.com/media/camera/camera2/extensions-api)
+- [Xiaomi Camera Engine SDK integration documentation](https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1812)
 - [Android thermal-aware camera guidance](https://developer.android.com/agents/skills/camera/camerax/references/thermals)
